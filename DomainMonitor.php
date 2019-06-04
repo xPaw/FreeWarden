@@ -48,21 +48,37 @@ class DomainMonitor
 	public function GetCertificates( string $hostname, array $addresses ) : array
 	{
 		$certificates = [];
+		$alreadySeen = [];
 
 		foreach( $addresses as $address )
 		{
 			$certificateStream = self::FetchCertificate( $address, $hostname );
 			$certificate = openssl_x509_parse( $certificateStream, false );
 
-			$certificates[ $certificate[ 'serialNumberHex' ] ] =
+			if( isset( $alreadySeen[ $certificate[ 'serialNumberHex' ] ] ) )
+			{
+				continue;
+			}
+
+			$subjectAltName = explode( ', ', $certificate[ 'extensions' ][ 'subjectAltName' ] );
+			sort( $subjectAltName );
+
+			$alreadySeen[ $certificate[ 'serialNumberHex' ] ] = true;
+			$certificates[] =
 			[
 				'name' => $certificate[ 'name' ],
 				'commonName' => $certificate[ 'subject' ][ 'commonName' ],
-				'subjectAltName' => $certificate[ 'extensions' ][ 'subjectAltName' ],
+				'subjectAltName' => $subjectAltName,
 				'notBefore' => $certificate[ 'validFrom_time_t' ],
 				'notAfter' => $certificate[ 'validTo_time_t' ],
+				'serialNumberHex' => $certificate[ 'serialNumberHex' ],
 			];
 		}
+
+		usort( $certificates, function( $a, $b )
+		{
+			return strcmp( $a[ 'serialNumberHex' ], $b[ 'serialNumberHex' ] );
+		} );
 
 		return $certificates;
 	}
