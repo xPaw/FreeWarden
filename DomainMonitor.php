@@ -10,6 +10,12 @@ class DomainMonitor
 		$nameservers = $whois->nameserver;
 		sort( $nameservers );
 
+		// it's supposed to be a boolean, but it's not always a boolean
+		if( is_string( $whois->dnssec ) )
+		{
+			$whois->dnssec = strtoupper( $whois->dnssec[ 0 ] ) !== 'U'; // unsigned
+		}
+
 		$whois =
 		[
 			'nameservers' => $nameservers,
