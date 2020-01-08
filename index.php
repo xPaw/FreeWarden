@@ -54,7 +54,7 @@ foreach( $newState as $object )
 		$messages[] =
 		[
 			'domain' => $object[ 'domain' ],
-			'message' => 'Domain expires in less than 30 days',
+			'message' => 'Domain expires in less than ' . GetDaysBetweenTimestamps( $object[ 'whois' ][ 'expires' ], $time ) . ' days',
 		];
 	}
 
@@ -65,10 +65,18 @@ foreach( $newState as $object )
 			$messages[] =
 			[
 				'domain' => $object[ 'domain' ],
-				'message' => 'Certificate expires in less than 30 days',
+				'message' => 'Certificate expires in less than ' . GetDaysBetweenTimestamps( $certificate[ 'notAfter' ], $time ) . ' days',
 			];
 		}
 	}
 }
 
 print_r( $messages );
+
+function GetDaysBetweenTimestamps( $a, $b )
+{
+	$a -= $a % 86400;
+	$b -= $b % 86400;
+	
+	return ( $a - $b ) / 86400;
+}
