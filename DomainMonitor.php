@@ -61,6 +61,11 @@ class DomainMonitor
 			$certificateStream = self::FetchCertificate( $address, $hostname );
 			$certificate = openssl_x509_parse( $certificateStream, false );
 
+			if( empty( $certificate[ 'name' ] ) )
+			{
+				continue;
+			}
+
 			if( isset( $alreadySeen[ $certificate[ 'serialNumberHex' ] ] ) )
 			{
 				continue;
