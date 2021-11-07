@@ -1,4 +1,6 @@
 <?php
+declare(strict_types=1);
+
 /**
  * Diffing multi dimensional arrays the easy way.
  *
@@ -12,16 +14,13 @@ class CompareArrays
 {
 	/**
 	 * Flattens multi-dimensional array into one dimensional array,
-	 * and turns keys into paths separated by $Separator (by default '/')
-	 *
-	 * @param array $Input
-	 * @param string $Separator
+	 * and turns keys into paths separated by $Separator (by default '/').
 	 */
-	public static function Flatten( $Input, $Separator = '/', $Path = null )
+	public static function Flatten( array $Input, string $Separator = '/', string $Path = '' ) : array
 	{
 		$Data = [];
 
-		if( $Path !== null )
+		if( $Path !== '' )
 		{
 			$Path .= $Separator;
 		}
@@ -52,22 +51,19 @@ class CompareArrays
 	 *
 	 * Optionally, use CompareArrays::Flatten() function to turn diff array
 	 * into a one dimensional array which will flatten keys into a single path.
-	 *
-	 * @param array $Old
-	 * @param array $New
 	 */
-	public static function Diff( $Old, $New )
+	public static function Diff( array $Old, array $New ) : array
 	{
 		$Diff = [];
 
-		if( $Old == $New )
+		if( $Old === $New )
 		{
 			return $Diff;
 		}
 
 		foreach( $Old as $Key => $Value )
 		{
-			if( !isset( $New[ $Key ] ) )
+			if( !array_key_exists( $Key, $New ) )
 			{
 				$Diff[ $Key ] = self::Singular( ComparedValue::TYPE_REMOVED, $Value );
 
@@ -111,7 +107,7 @@ class CompareArrays
 
 		foreach( $New as $Key => $Value )
 		{
-			if( !isset( $Old[ $Key ] ) )
+			if( !array_key_exists( $Key, $Old ) )
 			{
 				$Diff[ $Key ] = self::Singular( ComparedValue::TYPE_ADDED, $Value );
 			}
@@ -120,7 +116,7 @@ class CompareArrays
 		return $Diff;
 	}
 
-	private static function Singular( $Type, $Value )
+	private static function Singular( string $Type, mixed $Value ) : ComparedValue|array
 	{
 		if( is_array( $Value ) )
 		{
@@ -149,11 +145,11 @@ class ComparedValue
 	const TYPE_REMOVED = 'removed';
 	const TYPE_MODIFIED = 'modified';
 
-	public $OldValue;
-	public $NewValue;
-	public $Type;
+	public mixed $OldValue;
+	public mixed $NewValue;
+	public string $Type;
 
-	function __construct( $Type, $OldValue, $NewValue )
+	function __construct( string $Type, mixed $OldValue, mixed $NewValue )
 	{
 		$this->OldValue = $OldValue;
 		$this->NewValue = $NewValue;

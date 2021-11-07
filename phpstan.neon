@@ -1,0 +1,8 @@
+parameters:
+	checkMissingIterableValueType: false
+	checkFunctionNameCase: true
+	level: max
+	paths:
+		- .
+	excludePaths:
+		- vendor/*

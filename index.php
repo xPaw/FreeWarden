@@ -1,10 +1,20 @@
 <?php
+declare(strict_types=1);
 
 require __DIR__ . '/vendor/autoload.php';
 require __DIR__ . '/CompareArrays.php';
 require __DIR__ . '/DomainMonitor.php';
 
-$state = json_decode( file_get_contents( __DIR__ . '/state.json' ), true );
+$stateString = file_get_contents( __DIR__ . '/state.json' );
+
+if( $stateString === false )
+{
+	throw new RuntimeException( 'Failed to read state.json' );
+}
+
+/** @var array<string, array{domain: string, whois: array, addresses: string[], certificates: array}> $state */
+$state = json_decode( $stateString, true );
+unset( $stateString );
 $newState = [];
 $monitor = new DomainMonitor();
 
@@ -49,7 +59,7 @@ foreach( $diff as $path => $change )
 
 foreach( $newState as $object )
 {
-	$days = GetDaysBetweenTimestamps( $object[ 'whois' ][ 'expires' ] ?? 0, $time );
+	$days = GetDaysBetweenTimestamps( $object[ 'whois' ][ 'expires' ], $time );
 
 	if( $days <= 14 )
 	{
@@ -94,7 +104,7 @@ if( !empty( $messages ) )
 	echo $singleMessage;
 }
 
-function GetDaysBetweenTimestamps( $a, $b )
+function GetDaysBetweenTimestamps( int $a, int $b ) : int
 {
 	$a -= $a % 86400;
 	$b -= $b % 86400;

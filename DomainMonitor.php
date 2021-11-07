@@ -1,10 +1,13 @@
 <?php
+declare(strict_types=1);
 
 class DomainMonitor
 {
 	public function GetWhois( string $hostname ) : array
 	{
 		$whoisParser = new Novutec\WhoisParser\Parser();
+
+		/** @var \Novutec\WhoisParser\Result\Result $whois */
 		$whois = $whoisParser->lookup( $hostname );
 
 		$nameservers = $whois->nameserver;
@@ -33,6 +36,11 @@ class DomainMonitor
 		$records = dns_get_record( $hostname , DNS_A | DNS_AAAA );
 		$addresses = [];
 
+		if( $records === false )
+		{
+			return $addresses;
+		}
+
 		foreach( $records as $record )
 		{
 			$address = '';
@@ -58,10 +66,16 @@ class DomainMonitor
 
 		foreach( $addresses as $address )
 		{
-			$certificateStream = self::FetchCertificate( $address, $hostname );
+			$certificateStream = $this->FetchCertificate( $address, $hostname );
+
+			if( $certificateStream === null )
+			{
+				continue;
+			}
+
 			$certificate = openssl_x509_parse( $certificateStream, false );
 
-			if( empty( $certificate[ 'name' ] ) )
+			if( $certificate === false || empty( $certificate[ 'name' ] ) )
 			{
 				continue;
 			}
@@ -94,7 +108,7 @@ class DomainMonitor
 		return $certificates;
 	}
 
-	public function FetchCertificate( string $address, string $hostname )
+	public function FetchCertificate( string $address, string $hostname ) : ?OpenSSLCertificate
 	{
 		$context = stream_context_create( [
 			'ssl' =>

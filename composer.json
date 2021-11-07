@@ -1,5 +1,8 @@
 {
     "require": {
         "novutec/whoisparser": "^3.2"
+    },
+    "require-dev": {
+        "phpstan/phpstan": "^1.1"
     }
 }
