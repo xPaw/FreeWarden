@@ -102,6 +102,8 @@ if( !empty( $messages ) )
 	}
 
 	echo $singleMessage;
+
+	// You can send these messages to whatever monitor system you use (e.g. into some chat)
 }
 
 function GetDaysBetweenTimestamps( int $a, int $b ) : int
