@@ -1,7 +1,15 @@
 <?php
 declare(strict_types=1);
 
-$stateString = file_get_contents( __DIR__ . '/state.json' );
+if( file_exists( __DIR__ . '/state.json' ) )
+{
+	$stateString = file_get_contents( __DIR__ . '/state.json' );
+}
+else
+{
+	$stateString = '{}';
+}
+
 $state = json_decode( $stateString, true );
 
 for( $i = 1; $i < $argc; $i++ )
