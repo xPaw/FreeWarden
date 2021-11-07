@@ -49,34 +49,55 @@ foreach( $diff as $path => $change )
 
 foreach( $newState as $object )
 {
-	if( isset( $object[ 'whois' ][ 'expires' ] ) && $object[ 'whois' ][ 'expires' ] - $time < 2628000 )
+	$days = GetDaysBetweenTimestamps( $object[ 'whois' ][ 'expires' ] ?? 0, $time );
+
+	if( $days <= 14 )
 	{
 		$messages[] =
 		[
 			'domain' => $object[ 'domain' ],
-			'message' => 'Domain expires in less than ' . GetDaysBetweenTimestamps( $object[ 'whois' ][ 'expires' ], $time ) . ' days',
+			'message' => 'Domain expires in less than ' . $days . ' days',
 		];
 	}
 
 	foreach( $object[ 'certificates' ] as $certificate )
 	{
-		if( $certificate[ 'notAfter' ] - $time < 2628000 )
+		$days = GetDaysBetweenTimestamps( $certificate[ 'notAfter' ], $time );
+
+		if( $days <= 14 )
 		{
 			$messages[] =
 			[
 				'domain' => $object[ 'domain' ],
-				'message' => 'Certificate expires in less than ' . GetDaysBetweenTimestamps( $certificate[ 'notAfter' ], $time ) . ' days',
+				'message' => 'Certificate expires in less than ' . $days . ' days',
 			];
 		}
 	}
 }
 
-print_r( $messages );
+if( !empty( $messages ) )
+{
+	$singleMessage = '';
+
+	foreach( $messages as $msg )
+	{
+		if( is_array( $msg ) )
+		{
+			$singleMessage .= $msg[ 'domain' ] . ' - ' . $msg[ 'message' ] . PHP_EOL;
+		}
+		else
+		{
+			$singleMessage .= $msg . PHP_EOL;
+		}
+	}
+
+	echo $singleMessage;
+}
 
 function GetDaysBetweenTimestamps( $a, $b )
 {
 	$a -= $a % 86400;
 	$b -= $b % 86400;
-	
+
 	return ( $a - $b ) / 86400;
 }
