@@ -21,6 +21,8 @@ class DomainMonitor
 
 		$whois =
 		[
+			'registered' => $whois->registered,
+			'status' => $whois->status,
 			'nameservers' => $nameservers,
 			'created' => strtotime( $whois->created ),
 			'expires' => strtotime( $whois->expires ),
