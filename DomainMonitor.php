@@ -24,9 +24,9 @@ class DomainMonitor
 			'registered' => $whois->registered,
 			'status' => $whois->status,
 			'nameservers' => $nameservers,
-			'created' => strtotime( $whois->created ),
-			'expires' => strtotime( $whois->expires ),
-			'changed' => strtotime( $whois->changed ),
+			'created' => strtotime( $whois->created ?? '' ),
+			'expires' => strtotime( $whois->expires ?? '' ),
+			'changed' => strtotime( $whois->changed ?? '' ),
 			'dnssec' => $whois->dnssec,
 		];
 
